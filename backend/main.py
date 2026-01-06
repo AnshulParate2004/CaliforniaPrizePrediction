@@ -42,12 +42,17 @@ st.markdown("""
 @st.cache_resource
 def load_models():
     try:
-        models_path = Path(r"...\CaliforniaPrizePrediction\models")
+        # Get the directory where this script is located
+        current_dir = Path(__file__).parent
+        # Go up one level to project root, then into models folder
+        models_path = current_dir.parent / "models"
+        
         lightgbm_model = joblib.load(models_path / "tuned_lightgbm_regressor_model.pkl")
         xgboost_model = joblib.load(models_path / "tuned_xgboost_regressor_model.pkl")
         return lightgbm_model, xgboost_model
     except Exception as e:
         st.error(f"Error loading models: {str(e)}")
+        st.error(f"Looking for models in: {models_path if 'models_path' in locals() else 'unknown path'}")
         return None, None
 
 lightgbm_model, xgboost_model = load_models()
