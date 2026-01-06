@@ -1,0 +1,79 @@
+"""
+Test script to verify predictions work correctly
+"""
+import joblib
+import pandas as pd
+from pathlib import Path
+
+models_path = Path(r"D:\Learning\CaliforniaPrizePrediction\models")
+
+# Load models
+print("Loading models...")
+lgbm_model = joblib.load(models_path / "tuned_lightgbm_regressor_model.pkl")
+xgb_model = joblib.load(models_path / "tuned_xgboost_regressor_model.pkl")
+print("✓ Models loaded\n")
+
+# Test data with correct feature names
+test_data_lgbm = pd.DataFrame([{
+    'longitude': -122.23,
+    'latitude': 37.88,
+    'housing_median_age': 41,
+    'total_rooms': 880,
+    'total_bedrooms': 129,
+    'population': 322,
+    'households': 126,
+    'median_income': 8.3252,
+    'ocean_proximity_1H_OCEAN': 0,  # Underscore for LightGBM
+    'ocean_proximity_INLAND': 1,
+    'ocean_proximity_ISLAND': 0,
+    'ocean_proximity_NEAR_BAY': 0,
+    'ocean_proximity_NEAR_OCEAN': 0,
+    'bedroom_ratio': 0.1466,
+    'household_rooms': 6.9841
+}])
+
+test_data_xgb = pd.DataFrame([{
+    'longitude': -122.23,
+    'latitude': 37.88,
+    'housing_median_age': 41,
+    'total_rooms': 880,
+    'total_bedrooms': 129,
+    'population': 322,
+    'households': 126,
+    'median_income': 8.3252,
+    'ocean_proximity_1H OCEAN': 0,  # Space for XGBoost
+    'ocean_proximity_INLAND': 1,
+    'ocean_proximity_ISLAND': 0,
+    'ocean_proximity_NEAR BAY': 0,
+    'ocean_proximity_NEAR OCEAN': 0,
+    'bedroom_ratio': 0.1466,
+    'household_rooms': 6.9841
+}])
+
+# Test LightGBM
+print("Testing LightGBM prediction...")
+try:
+    # Try standard predict
+    lgbm_pred = lgbm_model.predict(test_data_lgbm)[0]
+    print(f"✓ LightGBM prediction: ${lgbm_pred:,.2f}")
+except Exception as e:
+    print(f"✗ Standard predict failed: {e}")
+    # Try booster predict
+    try:
+        lgbm_pred = lgbm_model.booster_.predict(test_data_lgbm.values)[0]
+        print(f"✓ LightGBM (booster) prediction: ${lgbm_pred:,.2f}")
+    except Exception as e2:
+        print(f"✗ Booster predict also failed: {e2}")
+
+print()
+
+# Test XGBoost
+print("Testing XGBoost prediction...")
+try:
+    xgb_pred = xgb_model.predict(test_data_xgb)[0]
+    print(f"✓ XGBoost prediction: ${xgb_pred:,.2f}")
+except Exception as e:
+    print(f"✗ XGBoost prediction failed: {e}")
+
+print("\n" + "="*50)
+print("If both predictions work, your app should work too!")

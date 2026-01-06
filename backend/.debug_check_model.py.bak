@@ -1,0 +1,61 @@
+"""
+Quick script to check model compatibility and get feature names
+"""
+import joblib
+from pathlib import Path
+import lightgbm as lgb
+import xgboost as xgb
+
+models_path = Path(r"D:\Learning\CaliforniaPrizePrediction\models")
+
+print("Checking LightGBM model...")
+try:
+    lgbm_model = joblib.load(models_path / "tuned_lightgbm_regressor_model.pkl")
+    print(f"✓ LightGBM model type: {type(lgbm_model)}")
+    print(f"✓ LightGBM version: {lgb.__version__}")
+    
+    # Try to get feature names
+    if hasattr(lgbm_model, 'feature_name_'):
+        print(f"✓ Features ({len(lgbm_model.feature_name_)}): {lgbm_model.feature_name_}")
+    elif hasattr(lgbm_model, 'booster_'):
+        print(f"✓ Features: {lgbm_model.booster_.feature_name()}")
+    
+    # Try a dummy prediction
+    import numpy as np
+    dummy_data = np.random.rand(1, 15)
+    try:
+        pred = lgbm_model.predict(dummy_data)
+        print(f"✓ Dummy prediction works: {pred}")
+    except Exception as e:
+        print(f"✗ Dummy prediction failed: {e}")
+        
+except Exception as e:
+    print(f"✗ LightGBM error: {e}")
+
+print("\n" + "="*50 + "\n")
+
+print("Checking XGBoost model...")
+try:
+    xgb_model = joblib.load(models_path / "tuned_xgboost_regressor_model.pkl")
+    print(f"✓ XGBoost model type: {type(xgb_model)}")
+    print(f"✓ XGBoost version: {xgb.__version__}")
+    
+    # Try to get feature names
+    if hasattr(xgb_model, 'feature_names_in_'):
+        print(f"✓ Features: {xgb_model.feature_names_in_}")
+    elif hasattr(xgb_model, 'get_booster'):
+        print(f"✓ Features: {xgb_model.get_booster().feature_names}")
+    
+    # Try a dummy prediction
+    dummy_data = np.random.rand(1, 15)
+    try:
+        pred = xgb_model.predict(dummy_data)
+        print(f"✓ Dummy prediction works: {pred}")
+    except Exception as e:
+        print(f"✗ Dummy prediction failed: {e}")
+        
+except Exception as e:
+    print(f"✗ XGBoost error: {e}")
+
+print("\n" + "="*50)
+print("Please run this script and share the output!")
