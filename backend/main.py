@@ -42,7 +42,7 @@ st.markdown("""
 @st.cache_resource
 def load_models():
     try:
-        models_path = Path(r"D:\Learning\CaliforniaPrizePrediction\models")
+        models_path = Path(r"...\CaliforniaPrizePrediction\models")
         lightgbm_model = joblib.load(models_path / "tuned_lightgbm_regressor_model.pkl")
         xgboost_model = joblib.load(models_path / "tuned_xgboost_regressor_model.pkl")
         return lightgbm_model, xgboost_model
